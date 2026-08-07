@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raju's Royal Artifacts | Digital Bazaar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-gradient: linear-gradient(135deg, #1a0b2e 0%, #2b1055 50%, #4c1d95 100%);
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --primary-accent: #f59e0b;
+            --secondary-accent: #ec4899;
+            --accent-gradient: linear-gradient(135deg, #f59e0b, #ec4899);
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+            --user-msg-bg: linear-gradient(135deg, #d97706, #b45309);
+            --raju-msg-bg: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: calc(100vh - 40px);
+        }
+
+        /* Header */
+        header {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 16px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
+        }
+
+        .brand-info h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand-info p {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .status-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #4ade80;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.4; }
+            100% { opacity: 1; }
+        }
+
+        /* Layout Grid */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        /* Inventory Sidebar */
+        .inventory-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .item-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            padding: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .item-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.09);
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        .item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .item-name {
+            font-weight: 600;
+            font-size: 15px;
+        }
+
+        .item-price {
+            color: #fbbf24;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .item-stock {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .out-of-stock {
+            color: #ef4444;
+            font-weight: 600;
+        }
+
+        /* Chat Section */
+        .chat-panel {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            max-width: 80%;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .msg-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user .msg-avatar {
+            background: #6366f1;
+        }
+
+        .msg-bubble {
+            padding: 12px 18px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .user .msg-bubble {
+            background: var(--user-msg-bg);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .raju .msg-bubble {
+            background: var(--raju-msg-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-main);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Input Area */
+        .chat-input-area {
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px 18px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-accent);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .send-btn {
+            background: var(--accent-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 0 24px;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .send-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            font-size: 13px;
+            padding: 8px 12px;
+        }
+
+        .typing-dots span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary-accent);
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+            .inventory-panel {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="brand">
+                <div class="avatar">👳‍♂️</div>
+                <div class="brand-info">
+                    <h1>Raju's Royal Artifacts</h1>
+                    <p>Digital Bazaar • Bargain with AI Shopkeeper</p>
+                </div>
+            </div>
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                Open for Bargaining
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar Inventory -->
+            <div class="inventory-panel">
+                <div class="panel-title">Bazaar Shelf</div>
+                
+                <div class="item-card" onclick="selectItem('Brass Lamp', 50)">
+                    <div class="item-header">
+                        <span class="item-name">🪔 Brass Lamp</span>
+                        <span class="item-price">50 coins</span>
+                    </div>
+                    <div class="item-stock">Stock: 5 units</div>
+                </div>
+
+                <div class="item-card" onclick="selectItem('Silk Scarf', 500)">
+                    <div class="item-header">
+                        <span class="item-name">🧣 Silk Scarf</span>
+                        <span class="item-price">500 coins</span>
+                    </div>
+                    <div class="item-stock">Stock: 2 units</div>
+                </div>
+
+                <div class="item-card" onclick="selectItem('Taj Mahal', 2000)">
+                    <div class="item-header">
+                        <span class="item-name">🕌 Taj Mahal</span>
+                        <span class="item-price">2000 coins</span>
+                    </div>
+                    <div class="item-stock out-of-stock">Stock: 0 (SOLD OUT)</div>
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="chat-panel">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message raju">
+                        <div class="msg-avatar">👳‍♂️</div>
+                        <div class="msg-bubble">
+                            Namaste! Welcome to Raju's Royal Artifacts! I have the finest digital treasures in the entire bazaar. What can I get for you today, my friend?
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Typing indicator -->
+                <div class="typing-indicator" id="typingIndicator">
+                    <span>Raju is checking his inventory...</span>
+                    <div class="typing-dots">
+                        <span></span><span></span><span></span>
+                    </div>
+                </div>
+
+                <!-- Input area -->
+                <div class="chat-input-area">
+                    <input type="text" id="userInput" class="chat-input" placeholder="Ask about items or make a bargain offer..." onkeypress="handleKeyPress(event)">
+                    <button id="sendBtn" class="send-btn" onclick="sendMessage()">Bargain!</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API Base URL - default relative or localhost
+        const BACKEND_URL = window.location.origin;
+        const userId = 'user_' + Math.random().toString(36).substring(2, 9);
+        const sessionId = 'session_' + Math.random().toString(36).substring(2, 9);
+        let sessionInitialized = false;
+
+        async function initSession() {
+            try {
+                const response = await fetch(`${BACKEND_URL}/apps/app/users/${userId}/sessions/${sessionId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                if (response.ok) {
+                    sessionInitialized = true;
+                    console.log('Session initialized successfully:', sessionId);
+                } else {
+                    console.warn('Session init returned status:', response.status);
+                }
+            } catch (err) {
+                console.error('Session init error:', err);
+            }
+        }
+
+        function selectItem(name, price) {
+            const input = document.getElementById('userInput');
+            input.value = `I want to buy the ${name}! What is your best price?`;
+            input.focus();
+        }
+
+        function appendMessage(sender, text) {
+            const container = document.getElementById('chatMessages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👤' : '👳‍♂️';
+            msgDiv.innerHTML = `
+                <div class="msg-avatar">${avatar}</div>
+                <div class="msg-bubble">${escapeHtml(text)}</div>
+            `;
+            
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML.replace(/\n/g, '<br>');
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const sendBtn = document.getElementById('sendBtn');
+            const text = input.value.trim();
+            if (!text) return;
+
+            input.value = '';
+            input.disabled = true;
+            sendBtn.disabled = true;
+
+            appendMessage('user', text);
+
+            const indicator = document.getElementById('typingIndicator');
+            indicator.style.display = 'flex';
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            if (!sessionInitialized) {
+                await initSession();
+            }
+
+            try {
+                const response = await fetch(`${BACKEND_URL}/run`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        appName: 'app',
+                        userId: userId,
+                        sessionId: sessionId,
+                        newMessage: {
+                            role: 'user',
+                            parts: [{ text: text }]
+                        }
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Server returned HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                // Parse response content
+                let rajuReply = "Arre! Something went wrong in the bazaar. Try asking Raju again!";
+                
+                if (Array.isArray(data)) {
+                    // ADK streamer or array response
+                    for (const item of data) {
+                        if (item.content && item.content.parts && item.content.parts[0] && item.content.parts[0].text) {
+                            rajuReply = item.content.parts[0].text;
+                            break;
+                        }
+                    }
+                } else if (data.content && data.content.parts && data.content.parts[0] && data.content.parts[0].text) {
+                    rajuReply = data.content.parts[0].text;
+                } else if (data.text) {
+                    rajuReply = data.text;
+                }
+
+                appendMessage('raju', rajuReply);
+            } catch (err) {
+                console.error('Error talking to Raju:', err);
+                appendMessage('raju', 'Arre bhai! Connection problem in the shop. Make sure your server is running!');
+            } finally {
+                indicator.style.display = 'none';
+                input.disabled = false;
+                sendBtn.disabled = false;
+                input.focus();
+            }
+        }
+
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', initSession);
+    </script>
+</body>
+</html>
