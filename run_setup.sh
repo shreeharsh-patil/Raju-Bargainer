@@ -46,12 +46,31 @@ fi
 # 3. Virtual Environment & Dependencies
 echo ""
 echo "[3/5] Setting up Virtual Environment (.venv)..."
+
+# If .venv exists but activate file is missing, clean up broken directory
+if [ -d ".venv" ] && [ ! -f ".venv/bin/activate" ]; then
+    echo "[!] Cleaning up incomplete .venv directory..."
+    rm -rf .venv
+fi
+
 if [ ! -d ".venv" ]; then
-    python3 -m venv .venv
+    if ! python3 -m venv .venv 2>/dev/null; then
+        echo "[-] Error: Failed to create virtual environment."
+        echo "[!] On Ubuntu/Debian Linux, install python3-venv by running:"
+        echo "    sudo apt update && sudo apt install -y python3-venv python3-full"
+        exit 1
+    fi
     echo "[+] Created virtual environment."
 fi
 
-source .venv/bin/activate
+if [ -f ".venv/bin/activate" ]; then
+    source .venv/bin/activate
+else
+    echo "[-] Error: .venv/bin/activate not found."
+    echo "[!] On Ubuntu/Debian Linux, install python3-venv by running:"
+    echo "    sudo apt update && sudo apt install -y python3-venv python3-full"
+    exit 1
+fi
 
 echo "[+] Installing/Updating dependencies from requirements.txt..."
 pip install --quiet --upgrade pip
