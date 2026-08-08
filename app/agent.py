@@ -56,7 +56,7 @@ Rules & Behavior:
 # Create the Agent
 root_agent = Agent(
     name="raju_agent",
-    model=os.getenv("MODEL_NAME", "gemini-2.5-flash"),
+    model=os.getenv("MODEL_NAME", "gemini-3.6-flash"),
     instruction=SYSTEM_INSTRUCTION,
     tools=[check_inventory]
 )
