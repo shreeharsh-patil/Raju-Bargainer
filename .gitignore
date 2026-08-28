@@ -13,7 +13,13 @@ __pycache__/
 # Environment Variables & Secrets
 .env
 .env.local
+.env.production
+.env.staging
 *.secret
+*.key
+*.pem
+credentials.json
+service-account*.json
 
 # IDEs & System Files
 .vscode/

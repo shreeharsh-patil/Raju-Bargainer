@@ -3,13 +3,24 @@
 ![Raju's Royal Artifacts Banner](assets/banner.png)
 
 # 👳‍♂️ Raju's Royal Artifacts
-### *AI-Powered Bargaining Shopkeeper Agent with Gemini & ADK*
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-3-8E44AD?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev/)
-[![Google ADK](https://img.shields.io/badge/Google%20ADK-2.6.2-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white)](https://google.github.io/adk-docs/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.141-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
+### Enterprise-Grade Conversational Bargaining Agent, Real-Time Function Calling & Google ADK Runtime Architecture
+
+**Raju's Royal Artifacts** is an interactive, stateful conversational AI bazaar agent engineered with **Google's Agent Development Kit (ADK)** and powered by **Google Gemini**. Operating as a witty, theatrical Indian shopkeeper, the agent leverages deterministic Python function calling (`check_inventory`) alongside system prompt constraints to dynamically inspect live inventory quantities, negotiate prices against lowball offers, and decline out-of-stock items in real time.
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Google_Gemini-3-8E44AD?style=for-the-badge&logo=google&logoColor=white" alt="Google Gemini" />
+  <img src="https://img.shields.io/badge/Google_ADK-2.6.2-4285F4?style=for-the-badge&logo=googlecloud&logoColor=white" alt="Google ADK" />
+  <img src="https://img.shields.io/badge/FastAPI-0.141-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+  <img src="https://img.shields.io/badge/HTML5_/_CSS3-Glassmorphism-E34F26?style=for-the-badge&logo=html5&logoColor=white" alt="Glassmorphism UI" />
+</p>
+
+<p align="center">
+  <a href="https://github.com/shreeharsh-patil/raju-shop/stargazers"><img alt="Stars" src="https://badgen.net/github/stars/shreeharsh-patil/raju-shop?color=8E44AD&icon=github"></a>
+  <a href="https://github.com/shreeharsh-patil/raju-shop/issues"><img alt="Issues" src="https://badgen.net/github/issues/shreeharsh-patil/raju-shop?color=8E44AD&icon=github"></a>
+  <a href="LICENSE"><img alt="License" src="https://badgen.net/badge/license/MIT/8E44AD"></a>
+</p>
 
 [**Explore Codelab**](https://codelabs.developers.google.com/agentic-app-gemini-3-adk) • [**Live Demo UI**](#-quick-start-guide) • [**API Reference**](#-api-reference)
 
@@ -19,35 +30,98 @@
 
 ## 📖 Overview
 
-Welcome to **Raju's Royal Artifacts**, an interactive digital bazaar where an AI agent acts as a witty, dramatic shopkeeper! Built using **Google's Agent Development Kit (ADK)** and powered by **Gemini**, Raju inspects real-time inventory using function calling and negotiates prices with customers.
-
-> [!NOTE]
-> This application implements the official Google Cloud Codelab: **[Build your own "Bargaining Shopkeeper" Agent with Gemini 3 and ADK](https://codelabs.developers.google.com/agentic-app-gemini-3-adk)**.
+Welcome to **Raju's Royal Artifacts**, an interactive digital bazaar where an autonomous AI agent acts as a charismatic, dramatic shopkeeper. Developed as an implementation of the official Google Cloud Codelab: **[Build your own "Bargaining Shopkeeper" Agent with Gemini 3 and ADK](https://codelabs.developers.google.com/agentic-app-gemini-3-adk)**, Raju blends real-time function calling tools with persona constraints to inspect in-memory inventory datasets, counter lowball customer bids, and manage out-of-stock items dynamically.
 
 ---
 
-## ✨ Features
+## 🏛️ System Architecture & Agent Runtime Topology
 
-- 🎭 **Dynamic Bargaining Persona**: Raju speaks with an Indian-English shopkeeper flair ("*Arre my friend!*", "*Wah! Special price for you!*"), selling high and countering lowball offers.
-- 🛠️ **Real-Time Function Calling**: Connected to a custom Python `check_inventory` tool to query live stock and pricing data.
-- 🚫 **Out-of-Stock Handling**: Dramatically declines sales when stock is zero (e.g. Taj Mahal).
-- ⚡ **ADK FastAPI Runtime**: Built with `google.adk.runners.InMemoryRunner` with CORS support and stateful sessions.
-- 🎨 **Glassmorphism Web UI**: Vibrant Indian bazaar aesthetic featuring shelf selection cards, character avatar, typing indicator, and responsive chat.
-- 🌍 **Cross-Platform**: Fully compatible with **Windows**, **Linux**, and **macOS**.
+Standard single-prompt LLM chatbots hallucinate product stock levels and fail to adhere to transactional pricing rules. 
 
----
-
-## 🏛️ System Architecture
+**Raju's Royal Artifacts** resolves this through an **ADK-Orchestrated Function Calling Topology**. The client communicates over CORS-enabled FastAPI endpoints to the `google.adk.runners.InMemoryRunner`. When a user inquires about or bids on an item, the runner invokes the deterministic `check_inventory` Python tool before returning the prompt context to Gemini, grounding the response directly in live inventory records.
 
 ```mermaid
 graph TD
-    User([👤 User / Browser]) -->|HTTP POST /run| Frontend[🎨 HTML5 / CSS Glassmorphism UI]
-    Frontend -->|POST /apps/app/users/id/sessions/id| ADKServer[⚡ FastAPI Backend Server]
-    ADKServer -->|Runner.run_async| ADKRunner[🤖 ADK InMemoryRunner]
-    ADKRunner <-->|Prompt & System Instructions| Gemini[🧠 Gemini 3 Model]
-    ADKRunner <-->|Tool Execution| InventoryTool[📦 check_inventory Python Tool]
-    InventoryTool <-->|Read Stock & Price| Database[(🛍️ In-Memory Bazaar Inventory)]
+    subgraph Client Presentation Layer
+        A["🎨 Glassmorphism Web UI <br><i>(HTML5 / CSS3 / JavaScript)</i>"]
+        B["🛍️ Shelf Selection Cards & Chat Stream"]
+    end
+
+    subgraph ADK Gateway & Server Layer
+        C["⚡ FastAPI Backend Server <br><i>(app/fast_api_app.py / Port 8000)</i>"]
+        D["🤖 ADK InMemoryRunner Core <br><i>(Session State & History Manager)</i>"]
+    end
+
+    subgraph Agent Logic & Tooling Mesh
+        E["🧠 Gemini 3 Model Mesh <br><i>(Persona & Bargaining Instructions)</i>"]
+        F["📦 check_inventory Python Tool <br><i>(Deterministic Function Call)</i>"]
+        G["💾 In-Memory Bazaar Inventory <br><i>(Stock, Pricing, & Metadata)</i>"]
+    end
+
+    A <-->|User Interaction Vectors| B
+    B <-->|POST /apps/app/users/id/sessions/id| C
+    C <-->|Runner.run_async Stream| D
+    D <-->|Prompt & System Persona| E
+    D <-->|Execute Function Call| F
+    F <-->|Query Real-Time Stock| G
+
+    style A fill:#000000,stroke:#333,stroke-width:2px,color:#fff
+    style B fill:#34B7F1,stroke:#209CEE,stroke-width:2px,color:#fff
+    style C fill:#009688,stroke:#004d40,stroke-width:2px,color:#fff
+    style D fill:#4285F4,stroke:#1a56b8,stroke-width:2px,color:#fff
+    style E fill:#8E44AD,stroke:#6c3483,stroke-width:2px,color:#fff
+    style F fill:#e74c3c,stroke:#c0392b,stroke-width:2px,color:#fff
+    style G fill:#f1c40f,stroke:#f39c12,stroke-width:2px,color:#333
 ```
+
+> [!NOTE]
+> **Stateful Session Isolation**: The InMemoryRunner maintains dedicated multi-turn conversation contexts per userId and sessionId, ensuring that negotiated prices and prior counter-offers persist throughout the bargaining session.
+
+### 🔄 End-to-End Bargaining & Tool Execution Lifecycle
+
+The sequence blueprint below shows the complete lifecycle of a user interaction, from price negotiation to function call execution, stock validation, and agent response synthesis:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Customer as 👤 Customer / Browser
+    participant UI as Glassmorphism Frontend
+    participant API as FastAPI ADK Gateway
+    participant RUN as ADK InMemoryRunner
+    participant GEM as Gemini 3 Model
+    participant TOOL as check_inventory Tool
+    participant DB as In-Memory Inventory
+
+    Customer->>UI: Select Item & Offer Bid ("I'll give you 20 coins for the Brass Lamp")
+    UI->>API: POST /run (Payload: userId, sessionId, prompt)
+    API->>RUN: Dispatch async turn event
+    RUN->>GEM: Send User Turn + System Instructions
+    
+    rect rgb(30, 20, 40)
+        note over GEM,TOOL: Function Calling Window
+        GEM-->>RUN: Emit Tool Call Intent (`check_inventory(item_name="Brass Lamp")`)
+        RUN->>TOOL: Execute Python function call
+        TOOL->>DB: Query stock quantity and listed price
+        DB-->>TOOL: Return `{ price: 50, stock: 5, status: "in_stock" }`
+        TOOL-->>RUN: Return Tool Output Payload
+        RUN->>GEM: Inject Tool Result Context
+    end
+
+    GEM->>GEM: Synthesize Persona Response (Counter-offer high, witty banter)
+    GEM-->>RUN: Yield Formatted Model Text ("Arre my friend! 20 coins is daylight robbery! How about 40?")
+    RUN-->>API: Stream Formatted ADK Response Content
+    API-->>UI: Return HTTP 200 OK JSON
+    UI-->>Customer: Render Dramatic Shopkeeper Dialogue & Update Chat
+```
+
+### 🛠️ Production Pipeline Implementation
+
+| Pipeline Component | Technical Challenge | Enterprise Engineering Solution |
+| :--- | :--- | :--- |
+| 🎭 Persona Constraint | LLMs drift out of character or accept arbitrary user price overrides without negotiation. | Enforces strict system instructions inside `agent.py` compelling Raju to defend margins and use witty Indian-English vernacular. |
+| 📦 Function Grounding | Quoting out-of-date prices or promising sold-out items to customers. | Binds the model directly to the `check_inventory` tool, forcing tool execution before price confirmation or rejection. |
+| ⚡ Fast Session Turns | Rebuilding tool context graphs on every request introduces runtime latency. | Uses `google.adk.runners.InMemoryRunner` within an asynchronous FastAPI loop for sub-second turn latency. |
+| 🎨 Responsive Bazaar UI | Presenting multi-turn negotiations and inventory cards cleanly across devices. | Delivers a responsive glassmorphic UI with quick-select item chips, dynamic typing indicators, and stateful session reset triggers. |
 
 ---
 
@@ -61,133 +135,108 @@ graph TD
 
 ---
 
-## 📋 Prerequisites
+## 🎨 Interface Showcase
 
-Before running the project, ensure you have:
-
-1. **Python 3.10+** installed ([python.org](https://www.python.org/downloads/)).
-2. **Gemini API Key** from [Google AI Studio](https://aistudio.google.com/).
+*(Add screenshots of the UI here)*
 
 ---
 
-## ⚡ Quick Start Guide
+## 🚀 Deployment & Quick Start Guide
+
+### Prerequisites
+
+- **Runtime Sandbox**: Python >= 3.10
+- **API Credentials**: Google Gemini API Key from [Google AI Studio](https://aistudio.google.com/)
 
 ### 🚀 Option A: Automated Single-Command Setup (Recommended)
 
-Run the automated setup script to check Python, set your API key, build `.venv`, install packages, run tests, and launch the web server!
+Run the automated setup script to verify Python, configure your environment, install dependencies, execute test suites, and launch the server:
 
 #### 🪟 Windows (PowerShell)
+
 ```powershell
 .\run_setup.ps1
 ```
 
 #### 🐧 Linux & 🍎 macOS (Bash / Zsh)
+
 ```bash
 chmod +x run_setup.sh
 ./run_setup.sh
 ```
 
----
-
 ### 🛠️ Option B: Step-by-Step Manual Setup
 
-<details>
-<summary><b>Click to expand Windows (PowerShell) Manual Steps</b></summary>
+**Windows (PowerShell):**
 
 ```powershell
-# 1. Navigate to project folder
+# 1. Clone & enter project folder
+git clone https://github.com/shreeharsh-patil/raju-shop.git
 cd raju-shop
 
 # 2. Create and activate virtual environment
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 
-# 3. Install dependencies
+# 3. Install project dependencies
 pip install -r requirements.txt
 
-# 4. Set Gemini API Key
+# 4. Export Gemini API Key
 $env:GEMINI_API_KEY="your_actual_gemini_api_key_here"
 
-# 5. Launch FastAPI server
+# 5. Launch FastAPI development server
 $env:PYTHONPATH="."
 python -m uvicorn app.fast_api_app:app --host 127.0.0.1 --port 8000 --reload
 ```
-</details>
 
-<details>
-<summary><b>Click to expand Linux & macOS (Bash) Manual Steps</b></summary>
+**Linux / macOS (Bash):**
 
 ```bash
-# 1. Navigate to project folder
+# 1. Clone & enter project folder
+git clone https://github.com/shreeharsh-patil/raju-shop.git
 cd raju-shop
 
 # 2. Create and activate virtual environment
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 3. Install dependencies
+# 3. Install project dependencies
 pip install -r requirements.txt
 
-# 4. Set Gemini API Key
+# 4. Export Gemini API Key
 export GEMINI_API_KEY="your_actual_gemini_api_key_here"
 
-# 5. Launch FastAPI server
+# 5. Launch FastAPI development server
 export PYTHONPATH="."
 python3 -m uvicorn app.fast_api_app:app --host 0.0.0.0 --port 8000 --reload
 ```
-</details>
 
-Once launched, open your web browser at:
-👉 **`http://localhost:8000`**
+Access the Bazaar UI at: 👉 **http://localhost:8000**
 
 ---
 
-## 🧪 Automated Testing
+## 🧪 Automated Testing & Validation
 
-Verify the agent and tool logic with `pytest`:
+Execute the unit test suite with pytest to verify agent initialization, tool execution, and out-of-stock logic:
 
-**Windows**:
-```powershell
-$env:PYTHONPATH="."
-python -m pytest tests/test_agent.py
-```
-
-**Linux / macOS**:
 ```bash
+# Windows
+$env:PYTHONPATH="."
+python -m pytest tests/test_agent.py -v
+
+# Linux / macOS
 export PYTHONPATH="."
-python3 -m pytest tests/test_agent.py
-```
-
----
-
-## 📁 Directory Structure
-
-```text
-raju-shop/
-├── assets/
-│   └── banner.png          # README Hero Banner Image
-├── app/
-│   ├── __init__.py
-│   ├── agent.py            # Raju persona, system prompt & check_inventory tool
-│   └── fast_api_app.py     # ADK FastAPI runner server
-├── tests/
-│   └── test_agent.py       # Pytest suite
-├── index.html              # Interactive Glassmorphism Web UI
-├── pyproject.toml          # Project configuration
-├── requirements.txt        # Python dependency manifest
-├── run_setup.ps1           # Windows All-in-One script
-├── run_setup.sh            # Linux/macOS All-in-One script
-└── README.md               # Project documentation
+python3 -m pytest tests/test_agent.py -v
 ```
 
 ---
 
 ## 🔌 API Reference
 
-<details>
-<summary><b>POST /apps/app/users/{user_id}/sessions/{session_id} — Initialize Session</b></summary>
+### POST /apps/app/users/{user_id}/sessions/{session_id} — Initialize Session
 
 **Response**:
+
 ```json
 {
   "userId": "user1",
@@ -196,12 +245,11 @@ raju-shop/
   "message": "Session created successfully"
 }
 ```
-</details>
 
-<details>
-<summary><b>POST /run — Execute Agent Turn</b></summary>
+### POST /run — Execute Agent Turn
 
 **Request Payload**:
+
 ```json
 {
   "appName": "app",
@@ -215,6 +263,7 @@ raju-shop/
 ```
 
 **Response Payload**:
+
 ```json
 {
   "appName": "app",
@@ -230,12 +279,41 @@ raju-shop/
   }
 }
 ```
-</details>
 
 ---
 
-## 📜 License & Credits
+## 📁 Repository Directory Structure
 
-- Built based on [Google Cloud Codelabs](https://codelabs.developers.google.com/agentic-app-gemini-3-adk).
-- Framework by [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
-- Open-source under the **MIT License**.
+```text
+raju-shop/
+├─ assets/                          (Project branding, banners, and screenshots)
+│  └─ banner.png                    (README hero banner graphic)
+├─ app/                             (Core Application Logic & ADK Server)
+│  ├─ __init__.py                   (Package namespace marker)
+│  ├─ agent.py                      (Raju persona, system prompt, and check_inventory tool)
+│  └─ fast_api_app.py               (ADK FastAPI runner server and route endpoints)
+├─ tests/                           (Automated Testing Suites)
+│  └─ test_agent.py                 (Pytest suite testing inventory tools & agent turns)
+├─ index.html                       (Interactive Glassmorphic Web Presentation UI)
+├─ pyproject.toml                   (Project configuration and packaging metadata)
+├─ requirements.txt                 (Python runtime dependency manifest)
+├─ run_setup.ps1                    (Windows All-in-One automation setup script)
+├─ run_setup.sh                     (Linux/macOS All-in-One automation setup script)
+└─ README.md                        (Unified platform documentation)
+```
+
+---
+
+## 📜 Credits & License
+
+- Built based on the official Google Cloud Codelab: [Build your own "Bargaining Shopkeeper" Agent with Gemini 3 and ADK](https://codelabs.developers.google.com/agentic-app-gemini-3-adk).
+- Framework powered by the [Google Agent Development Kit (ADK)](https://google.github.io/adk-docs/).
+- Open-source and distributed under the **MIT License**.
+
+### 👤 Project Author
+
+Developed and Maintained by **Shreeharsh Patil**.
+
+Feel free to contact me or submit issues via:
+- **Email**: shreeharsh.dev@gmail.com
+- **GitHub Profile**: [github.com/shreeharsh-patil](https://github.com/shreeharsh-patil)

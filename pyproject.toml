@@ -1,0 +1,24 @@
+[project]
+name = "raju-shop"
+version = "1.0.0"
+description = "AI-Powered Bargaining Shopkeeper Agent with Gemini & ADK"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.10"
+dependencies = [
+    "google-adk>=2.6.2",
+    "google-genai>=2.17.0",
+    "fastapi>=0.141.0",
+    "uvicorn>=0.52.0",
+    "pydantic>=2.13.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.1.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

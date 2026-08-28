@@ -1,9 +1,14 @@
 import os
 import sys
+import time
 import logging
+from dotenv import load_dotenv
+
+load_dotenv()
+import json
 from typing import Any, Dict, List, Optional
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -15,12 +20,17 @@ from app.agent import root_agent, app as adk_app
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fast_api_app")
 
+_start_time = time.time()
+
 app = FastAPI(title="Raju's Royal Artifacts - ADK Agent API")
 
-# Enable CORS for local testing
+# Configurable CORS origins (comma-separated in env, or default to *)
+cors_origins_env = os.getenv("CORS_ORIGINS", "*")
+cors_origins = [o.strip() for o in cors_origins_env.split(",")] if cors_origins_env != "*" else ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,6 +52,17 @@ class RunRequest(BaseModel):
     userId: str
     sessionId: str
     newMessage: NewMessage
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint for monitoring."""
+    return {
+        "status": "healthy",
+        "service": "raju-agent",
+        "uptime_seconds": round(time.time() - _start_time),
+        "agent": runner.agent.name if hasattr(runner, 'agent') else "unknown",
+    }
+
 
 @app.get("/")
 async def serve_index():
@@ -115,7 +136,7 @@ async def run_agent(req: RunRequest):
                             response_text += part.text
             elif hasattr(event, "text") and event.text:
                 response_text += event.text
-        
+
         if not response_text:
             response_text = "Arre bhai! Raju is thinking... Ask again, my friend!"
 
@@ -133,11 +154,21 @@ async def run_agent(req: RunRequest):
     except Exception as e:
         logger.error(f"Error running agent: {e}", exc_info=True)
         err_msg = str(e)
-        if "API_KEY" in err_msg.upper() or "AUTHENTICATION" in err_msg.upper() or "CREDENTIAL" in err_msg.upper():
-            fallback = f"Arre my friend! Raju needs his GEMINI_API_KEY environment variable set to talk to the Gemini brain! (Error: {err_msg})"
+        err_upper = err_msg.upper()
+
+        if any(kw in err_upper for kw in ("API_KEY", "AUTHENTICATION", "CREDENTIAL", "PERMISSION")):
+            fallback = (
+                "Arre my friend! Raju needs his GEMINI_API_KEY "
+                "environment variable set to talk to the Gemini brain! "
+                f"(Error: {err_msg})"
+            )
+        elif "RATE_LIMIT" in err_upper or "QUOTA" in err_upper:
+            fallback = "Arre bhai! Too many customers at once! Raju needs a moment to catch his breath. Try again in a bit!"
+        elif "TIMEOUT" in err_upper:
+            fallback = "Arre bhai! The stars are aligning slowly today. Raju is thinking too hard — try asking something simpler!"
         else:
             fallback = f"Arre bhai! Something unexpected happened in the bazaar: {err_msg}"
-            
+
         return {
             "appName": app_name,
             "userId": user_id,
@@ -147,3 +178,64 @@ async def run_agent(req: RunRequest):
                 "parts": [{"text": fallback}]
             }
         }
+
+
+@app.post("/run_stream")
+async def run_agent_stream(req: RunRequest):
+    """Executes a turn with Raju agent using SSE streaming."""
+    user_id = req.userId
+    session_id = req.sessionId
+
+    if not req.newMessage.parts or not req.newMessage.parts[0].text:
+        raise HTTPException(status_code=400, detail="Missing message text in request")
+
+    user_text = req.newMessage.parts[0].text
+    logger.info(f"Stream agent request from user={user_id}: {user_text}")
+
+    content = types.Content(
+        role="user",
+        parts=[types.Part.from_text(text=user_text)]
+    )
+
+    async def event_generator():
+        try:
+            async for event in runner.run_async(
+                user_id=user_id,
+                session_id=session_id,
+                new_message=content
+            ):
+                text_chunk = ""
+                if hasattr(event, "content") and event.content:
+                    if hasattr(event.content, "parts") and event.content.parts:
+                        for part in event.content.parts:
+                            if hasattr(part, "text") and part.text:
+                                text_chunk += part.text
+                elif hasattr(event, "text") and event.text:
+                    text_chunk = event.text
+
+                if text_chunk:
+                    yield f"data: {json.dumps({'text': text_chunk})}\n\n"
+
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            logger.error(f"Stream error: {e}", exc_info=True)
+            err_msg = str(e)
+            err_upper = err_msg.upper()
+            if any(kw in err_upper for kw in ("API_KEY", "AUTHENTICATION", "CREDENTIAL", "PERMISSION")):
+                fallback = f"Arre my friend! Raju needs his GEMINI_API_KEY set! (Error: {err_msg})"
+            elif "RATE_LIMIT" in err_upper or "QUOTA" in err_upper:
+                fallback = "Arre bhai! Too many customers! Try again in a bit!"
+            else:
+                fallback = f"Arre bhai! Something happened: {err_msg}"
+            yield f"data: {json.dumps({'text': fallback})}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
+    )
